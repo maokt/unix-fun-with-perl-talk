@@ -1,0 +1,13 @@
+daemon	daemon.pl	/setsid/
+exec	exec.pl	/exec/
+exit	exit.pl	/exit/
+fork	fork.pl	/fork/
+kill	kill.pl	/^kill/
+multiple	dwarves.pl	/fork/
+pipe	pipe.pl	/pipe/
+signal	stopme.pl	/SIG/
+sleep	sleep.pl	/sleep/
+sparse	sparse.pl	/show/
+stat	stat.pl	/stat/
+symlink	symlink.pl	/lstat/
+wait	wait.pl	/fork/

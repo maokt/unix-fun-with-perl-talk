@@ -1,0 +1,172 @@
+<title
+< ┌─────────────────────────────────────────────────────────────────────────┐
+< │                                                                         │
+< │         m             "                  mmmmmm                         │
+< │       "m#m"  m mm   mmm    m   m         #      m   m  m mm             │
+< │       m"#"m  #"  #    #     #m#          #mmmmm #   #  #"  #            │
+< │         "    #   #    #     m#m          #      #   #  #   #            │
+< │              #   #  mm#mm  m" "m         #      "mm"#  #   #            │
+< │                                                                         │
+< │                                                                         │
+< │                                                                         │
+< │               "      m    #             mmmmm                ""#        │
+< │     m     m mmm    mm#mm  # mm          #   "#  mmm    m mm    #        │
+< │     "m m m"   #      #    #"  #         #mmm#" #"  #   #"  "   #        │
+< │      #m#m#    #      #    #   #         #      #""""   #       #        │
+< │       # #   mm#mm    "mm  #   #         #      "#mm"   #       "mm      │
+< │                                                                         │
+< │                                                                         │
+< └─────────────────────────────────────────────────────────────────────────┘
+introduction
+	Explaining some fundamental Unix concepts with Perl.
+	With a little bit of historical context.
+		Unix has changed over its 44-ish years.
+		Some mistakes were made.
+processes
+	fork
+		create a new process, just like the old one
+		creator is the parent, created is the child
+	wait
+		a good parent waits for the child to finish
+		if parent quits, child is adopted by process #1
+		if child finishes before parent waits, child becomes a zombie
+	exit
+		child can inform parent of success or failure
+	sleep
+		like some of you now
+		when you've nothing better to do
+	kill
+		send a signal to a process
+		often resulting in death, but not always
+	multiple processes
+		need to keep track of your children
+	exec
+		if you ever need more than Perl
+files
+	Unix concept: everything is a file
+		/home/marty/todo-list
+		/etc/passwd
+		/dev/sda3
+		/dev/urandom
+	open
+		"<" read
+		">" truncate and write, create if required
+		">>" append write, create if required
+		"+<" read and write, without truncate
+		"+>" truncate, then read and write
+		Perl has more modes that do extra work...
+	stat
+		0 dev
+			filesystem device number
+		1 ino
+			inode number (unique per device (supposedly))
+		2 mode
+			file type and permissions
+		3 nlink
+			number of hard links to the file
+			reference counting garbage collection
+			unopened files deleted when nlink == 0
+		4 uid
+			numeric user ID of file's owner
+		5 gid
+			numeric group ID of file's owner
+		6 rdev
+			device number, if this file is a device
+		7 size
+			total size of file, in bytes
+		8 atime
+			last access time
+			Huge performance penalty by simply existing.
+			Please don't trust this!
+		9 mtime
+			last modify time
+		10 ctime
+			last inode change time
+			Often used as creation time, but not (any more).
+		11 blksize
+			preferred block size for efficient I/O
+		12 blocks
+			number of 512 byte blocks allocated
+			will not match file size for sparse files
+	opendir
+		directories map names to inodes
+		directories are not normal files (any more)
+		only read access via opendir
+	link
+		give an additional new name to an existing file
+		increment nlink
+		must be on same device
+		unlink
+			remove a name to inode mapping
+			decrement nlink
+			will delete the file if nlink == 0
+		rename
+			unlink $new
+			link $old, $new
+			unlink $old
+	symlink
+		hard links cannot cross devices
+		symbolic link is a path redirection
+		use lstat to get info about the symlink
+		use readlink to determine the target
+		Beware the target may be bogus
+angles & daemons
+	dup
+		">&" or "<&"
+	special files
+		/dev/null
+		/dev/zero
+	signal
+		harken, or die
+		: DON'T THINK OF IT AS DYING
+		: JUST THINK OF IT AS LEAVING EARLY TO AVOID THE RUSH
+		INT
+			interrupt
+			ctrl-c
+		QUIT
+			quit and dump core
+			ctrl-\
+		HUP
+			hang-up the phone
+		TERM
+			terminate
+			polite death
+		KILL
+			brutal death
+		STOP
+			stop where you are, but don't quit
+		CONT
+			continue from where you stopped
+		CHLD
+			your children are done
+		WINCH
+			your terminal window has changed size
+		ALRM
+			wake up!
+			you scheduled the alarm, here it is
+		SEGV
+			memory protection violation
+			(subject of another talk)
+		FPE
+			handle real numbers with care
+		PIPE
+			the other end of the pipe has closed
+	pipe
+		some shell examples
+			cat /etc/passwd | wc
+				wc stops when input ends
+			cat /dev/zero | wc
+				input never stops, so wc never stops
+				don't try this at home
+			cat /dev/zero | head -c 32
+				head stops after reading 32 bytes
+				What stops cat?
+	daemon
+		no controlling terminal
+		separate process group
+			multicast signals
+			terminal sends signal to foreground process group
+		setsid
+			session leader
+			children sent hup when exit
+			(foreground process group)
